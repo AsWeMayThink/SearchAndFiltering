@@ -24,12 +24,20 @@ export class FilterPage extends LitElement {
 
   render() {
     return html`
-      ${GreatArtists.map(
-        artist =>
-          html`
-            <artist-card .artist="${artist}"></artist-card>
-          `
-      )}
+      <div class="container">
+        <div class="notification">
+          <div class="columns is-multiline is-mobile">
+            ${GreatArtists.map(
+              artist =>
+                html`
+                  <div class="column is-one-quarter">
+                    <artist-card .artist="${artist}"></artist-card>
+                  </div>
+                `
+            )}
+          </div>
+        </div>
+      </div>
     `;
   }
 }

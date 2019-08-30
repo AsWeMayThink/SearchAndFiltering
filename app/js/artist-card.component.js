@@ -30,11 +30,6 @@ export class ArtistCard extends LitElement {
   render() {
     return html`
       <style>
-        artist-card {
-          display: block;
-          width: 400px;
-        }
-
         artist-card .card-image figure {
           display: flex;
         }
