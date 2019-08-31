@@ -20,9 +20,6 @@ export class FilterPage extends LitElement {
     this.allGenres = new Set();
     this.allNationalities = new Set();
 
-    this.selectedGenres = new Set();
-    this.selectedNationalities = new Set();
-
     GreatArtists.forEach(artist => {
       // Break the years apart into separate fields.
 
@@ -66,22 +63,23 @@ export class FilterPage extends LitElement {
   toggleGenre(e, genre) {
     if (e.target.checked) {
       // Add the genre to the list of those to include.
-      this.selectedGenres.add(genre);
+      this.collection.filters.genre.unionQuery(genre);
     } else {
       // Remove the genre from the list of those to include.
-      this.selectedGenres.delete(genre);
+      this.collection.filters.genre.removeSingleQuery(genre);
     }
 
+    console.log(this.collection.filters.genre);
     this.filter();
   }
 
   toggleNationality(e, nationality) {
     if (e.target.checked) {
       // Add the nationality to the list of those to include.
-      this.selectedNationalities.add(nationality);
+      this.collection.filters.nationality.unionQuery(nationality);
     } else {
       // Remove the nationality from the list of those to include.
-      this.selectedNationalities.delete(nationality);
+      this.collection.filters.nationality.removeSingleQuery(nationality);
     }
 
     this.filter();
@@ -91,38 +89,18 @@ export class FilterPage extends LitElement {
     // By default, we want all the artists.
     let matches = this.collection.getAllItems();
 
-    // Go through all the genres and OR together their filter results.
-    if (this.selectedGenres.size) {
-      let genres = Array.from(this.selectedGenres).reduce((filter, genre) => {
-        if (!filter) {
-          return this.collection.filters.genre.getFn(genre);
-        } else {
-          return filter.or(this.collection.filters.genre.getFn(genre));
-        }
-      }, null);
-
-      // AND together the artists who matched the selected genres and our current list.
-      matches = matches.and(genres);
+    if (
+      this.collection.filters.genre.current_query &&
+      this.collection.filters.genre.current_query.stack.length
+    ) {
+      matches = matches.and(this.collection.filters.genre.current_query);
     }
 
-    // Then do the same for the nationalities.
-    if (this.selectedNationalities.size) {
-      let nationalities = Array.from(this.selectedNationalities).reduce(
-        (filter, nationality) => {
-          if (!filter) {
-            return this.collection.filters.nationality.getFn(nationality);
-          } else {
-            return filter.or(
-              this.collection.filters.nationality.getFn(nationality)
-            );
-          }
-        },
-        null
-      );
-
-      // AND together the list of selected artists based upon nationality with our
-      // current list.
-      matches = matches.and(nationalities);
+    if (
+      this.collection.filters.nationality.current_query &&
+      this.collection.filters.nationality.current_query.stack.length
+    ) {
+      matches = matches.and(this.collection.filters.nationality.current_query);
     }
 
     // And mark all the appropriate items for hiding first and then only the items
