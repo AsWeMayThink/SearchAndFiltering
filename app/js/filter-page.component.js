@@ -89,6 +89,7 @@ export class FilterPage extends LitElement {
     // By default, we want all the artists.
     let matches = this.collection.getAllItems();
 
+    // If we have a current query in the genre filter, AND it with the matches.
     if (
       this.collection.filters.genre.current_query &&
       this.collection.filters.genre.current_query.stack.length
@@ -96,6 +97,7 @@ export class FilterPage extends LitElement {
       matches = matches.and(this.collection.filters.genre.current_query);
     }
 
+    // If we have a current query in the nationality filter, AND it with the matches.
     if (
       this.collection.filters.nationality.current_query &&
       this.collection.filters.nationality.current_query.stack.length
