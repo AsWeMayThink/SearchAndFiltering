@@ -39,6 +39,14 @@ export class FilterPage extends LitElement {
       );
     });
 
+    this.initializePourOver();
+  }
+
+  createRenderRoot() {
+    return this;
+  }
+
+  initializePourOver() {
     this.allGenres = Array.from(this.allGenres);
     this.allNationalities = Array.from(this.allNationalities);
 
@@ -53,10 +61,6 @@ export class FilterPage extends LitElement {
     this.collection.addFilters([genresFilter, nationalitiesFilter]);
 
     this.filter();
-  }
-
-  createRenderRoot() {
-    return this;
   }
 
   toggleGenre(e, genre) {
