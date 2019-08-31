@@ -37,6 +37,11 @@ export class ArtistCard extends LitElement {
         artist-card .card-image figure img {
           object-fit: contain;
         }
+
+        artist-card div.card-content div.content {
+          height: 300px;
+          overflow-y: scroll;
+        }
       </style>
       <div class="card">
         <div class="card-image">
@@ -47,16 +52,18 @@ export class ArtistCard extends LitElement {
         <div class="card-content">
           <div class="media">
             <div class="media-content">
-              <p class="title is-4">${this.artist.name}</p>
+              <p class="title is-5">${this.artist.name}</p>
               <p class="subtitle is-6">${this.artist.years}</p>
-              <p class="subtitle is-7">(${this.artist.paintings} paintings)</p>
+              <p class="subtitle is-7">
+                <a href="${this.artist.wikipedia}">wikipedia</a> (${this.artist
+                  .paintings}
+                paintings)
+              </p>
             </div>
           </div>
 
           <div class="content is-size-7">
             ${this.artist.bio}
-            <br />
-            <a href="${this.artist.wikipedia}">wikipedia</a>
           </div>
         </div>
       </div>
