@@ -84,6 +84,7 @@ export class FilterPage extends LitElement {
   }
 
   filter() {
+    // By default, we want all the artists.
     let matches = this.collection.getAllItems();
 
     // Go through all the genres and OR together their filter results.
@@ -96,6 +97,7 @@ export class FilterPage extends LitElement {
         }
       }, null);
 
+      // AND together the artists who matched the selected genres and our current list.
       matches = matches.and(genres);
     }
 
@@ -114,10 +116,13 @@ export class FilterPage extends LitElement {
         null
       );
 
+      // AND together the list of selected artists based upon nationality with our
+      // current list.
       matches = matches.and(nationalities);
     }
 
-    // And mark all the appropriate items.
+    // And mark all the appropriate items for hiding first and then only the items
+    // which passed the filters to show.
     GreatArtists.forEach(artist => (artist.show = false));
     matches.cids.forEach(cid => (GreatArtists[cid].show = true));
 
