@@ -6,6 +6,7 @@ import {
 import { GreatArtists } from './artists.js';
 
 import './artist-card.component.js';
+import { makeTextSearchFilter } from './textSearchFilter.js';
 
 export class FilterPage extends LitElement {
   static get properties() {
@@ -42,6 +43,8 @@ export class FilterPage extends LitElement {
     this.allNationalities = Array.from(this.allNationalities);
 
     this.initializePourOver();
+
+    this.debouncedUpdateSearchText = _.debounce(this.updateSearchText, 300);
   }
 
   createRenderRoot() {
@@ -51,17 +54,11 @@ export class FilterPage extends LitElement {
   initializePourOver() {
     this.collection = new PourOver.Collection(this.greatArtists);
 
-    let genresFilter = PourOver.makeInclusionFilter('genre', this.allGenres);
-    let nationalitiesFilter = PourOver.makeInclusionFilter(
-      'nationality',
-      this.allNationalities
-    );
-    let favoritesFilter = PourOver.makeManualFilter('favorite');
-
     this.collection.addFilters([
-      genresFilter,
-      nationalitiesFilter,
-      favoritesFilter
+      PourOver.makeInclusionFilter('genre', this.allGenres),
+      PourOver.makeInclusionFilter('nationality', this.allNationalities),
+      PourOver.makeManualFilter('favorite'),
+      makeTextSearchFilter('bio', 'bio')
     ]);
 
     this.filter();
@@ -91,6 +88,12 @@ export class FilterPage extends LitElement {
     this.filter();
   }
 
+  updateSearchText(e) {
+    this.searchText = e.target.value;
+
+    this.filter();
+  }
+
   toggleFavorite() {
     this.filterFavorites = !this.filterFavorites;
 
@@ -111,6 +114,10 @@ export class FilterPage extends LitElement {
   filter() {
     // By default, we want all the artists.
     let matches = this.collection.getAllItems();
+
+    if (this.searchText) {
+      matches = matches.and(this.collection.filters.bio.getFn(this.searchText));
+    }
 
     // If we have a current query in the genre filter, AND it with the matches.
     if (
@@ -159,6 +166,7 @@ export class FilterPage extends LitElement {
                 class="input"
                 type="text"
                 placeholder="Search within the names and bios"
+                @input="${this.debouncedUpdateSearchText}"
               />
             </div>
           </div>
