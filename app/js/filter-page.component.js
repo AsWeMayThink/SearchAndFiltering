@@ -11,7 +11,7 @@ export class FilterPage extends LitElement {
   static get properties() {
     // All of the properties of this component and a type for each (used when converting
     // attributes to property values).
-    return {};
+    return { greatArtists: { type: Array } };
   }
 
   constructor() {
@@ -20,7 +20,7 @@ export class FilterPage extends LitElement {
     this.allGenres = new Set();
     this.allNationalities = new Set();
 
-    GreatArtists.forEach(artist => {
+    this.greatArtists = GreatArtists.map(artist => {
       // Break the years apart into separate fields.
 
       // Split the genres into an array of separate tags and then add them all to a set
@@ -34,7 +34,12 @@ export class FilterPage extends LitElement {
       artist.nationality.forEach(nationality =>
         this.allNationalities.add(nationality)
       );
+
+      return artist;
     });
+
+    this.allGenres = Array.from(this.allGenres);
+    this.allNationalities = Array.from(this.allNationalities);
 
     this.initializePourOver();
   }
@@ -44,18 +49,20 @@ export class FilterPage extends LitElement {
   }
 
   initializePourOver() {
-    this.allGenres = Array.from(this.allGenres);
-    this.allNationalities = Array.from(this.allNationalities);
-
-    this.collection = new PourOver.Collection(GreatArtists);
+    this.collection = new PourOver.Collection(this.greatArtists);
 
     let genresFilter = PourOver.makeInclusionFilter('genre', this.allGenres);
     let nationalitiesFilter = PourOver.makeInclusionFilter(
       'nationality',
       this.allNationalities
     );
+    let favoritesFilter = PourOver.makeManualFilter('favorite');
 
-    this.collection.addFilters([genresFilter, nationalitiesFilter]);
+    this.collection.addFilters([
+      genresFilter,
+      nationalitiesFilter,
+      favoritesFilter
+    ]);
 
     this.filter();
   }
@@ -69,7 +76,6 @@ export class FilterPage extends LitElement {
       this.collection.filters.genre.removeSingleQuery(genre);
     }
 
-    console.log(this.collection.filters.genre);
     this.filter();
   }
 
@@ -83,6 +89,23 @@ export class FilterPage extends LitElement {
     }
 
     this.filter();
+  }
+
+  toggleFavorite() {
+    this.filterFavorites = !this.filterFavorites;
+
+    this.filter();
+  }
+
+  favorited(e) {
+    let artist = this.greatArtists[e.detail.id];
+    artist.favorite = !artist.favorite;
+
+    if (e.detail.favorite) {
+      this.collection.filters.favorite.addItems(e.detail.id);
+    } else {
+      this.collection.filters.favorite.removeItems(e.detail.id);
+    }
   }
 
   filter() {
@@ -105,10 +128,22 @@ export class FilterPage extends LitElement {
       matches = matches.and(this.collection.filters.nationality.current_query);
     }
 
+    if (this.filterFavorites) {
+      if (
+        !(
+          this.collection.filters.favorite.current_query &&
+          this.collection.filters.favorite.current_query.stack.length
+        )
+      ) {
+        this.collection.filters.favorite.addItems([]);
+      }
+      matches = matches.and(this.collection.filters.favorite.current_query);
+    }
+
     // And mark all the appropriate items for hiding first and then only the items
     // which passed the filters to show.
-    GreatArtists.forEach(artist => (artist.show = false));
-    matches.cids.forEach(cid => (GreatArtists[cid].show = true));
+    this.greatArtists.forEach(artist => (artist.show = false));
+    matches.cids.forEach(cid => (this.greatArtists[cid].show = true));
 
     this.requestUpdate();
   }
@@ -162,13 +197,28 @@ export class FilterPage extends LitElement {
               )}
             </div>
           </div>
+          <div class="field">
+            <label class="label">Favorite</label>
+            <div class="control">
+              <label class="radio">
+                <input type="checkbox" name="answer"
+                @change="${this.toggleFavorite}/>
+                <span class="icon has-text-danger">
+                  <i class="fas fa-heart"></i>
+                </span>
+              </label>
+            </div>
+          </div>
 
           <div class="columns is-multiline is-mobile">
-            ${GreatArtists.map(artist => {
+            ${this.greatArtists.map(artist => {
               if (artist.show) {
                 return html`
                   <div class="column is-one-quarter">
-                    <artist-card .artist="${artist}"></artist-card>
+                    <artist-card
+                      .artist="${artist}"
+                      @favorited="${this.favorited}"
+                    ></artist-card>
                   </div>
                 `;
               } else {

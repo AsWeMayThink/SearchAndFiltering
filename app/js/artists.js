@@ -1,3 +1,5 @@
+// This is a conversion of the CSV data set from Kaggle here: https://www.kaggle.com/ikarus777/best-artworks-of-all-time
+// to a JSON equivalent.
 export const GreatArtists = [
   {
     id: 0,

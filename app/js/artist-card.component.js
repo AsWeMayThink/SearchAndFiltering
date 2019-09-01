@@ -27,6 +27,28 @@ export class ArtistCard extends LitElement {
     return `./img/${fileFriendlyArtistName}/${fileFriendlyArtistName}_${number}.jpg`;
   }
 
+  toggleFavorite(e, artist) {
+    let favorited = new CustomEvent('favorited', {
+      bubbles: true,
+      detail: { id: artist.id, favorite: !artist.favorite }
+    });
+    this.dispatchEvent(favorited);
+
+    this.requestUpdate();
+  }
+
+  favoriteIcon(favorite) {
+    if (favorite) {
+      return html`
+        <i class="fas fa-heart"></i>
+      `;
+    } else {
+      return html`
+        <i class="far fa-heart"></i>
+      `;
+    }
+  }
+
   render() {
     return html`
       <style>
@@ -53,7 +75,15 @@ export class ArtistCard extends LitElement {
           <div class="media">
             <div class="media-content">
               <p class="title is-5">${this.artist.name}</p>
-              <p class="subtitle is-6">${this.artist.years}</p>
+              <p class="subtitle is-6">
+                ${this.artist.years}
+                <span
+                  @click="${e => this.toggleFavorite(e, this.artist)}"
+                  class="icon has-text-danger"
+                >
+                  ${this.favoriteIcon(this.artist.favorite)}
+                </span>
+              </p>
               <p class="subtitle is-7">
                 <a href="${this.artist.wikipedia}">wikipedia</a> (${this.artist
                   .paintings}
