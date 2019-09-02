@@ -109,6 +109,8 @@ export class FilterPage extends LitElement {
     } else {
       this.collection.filters.favorite.removeItems(e.detail.id);
     }
+
+    this.filter();
   }
 
   filter() {
